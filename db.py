@@ -1,12 +1,10 @@
 import sqlite3
 from datetime import datetime
 
-# 1. Setup both tables: 'escalations' and 'query_logs'
 def setup_database():
     connection = sqlite3.connect("airs_database.db")
     cursor = connection.cursor()
 
-    # Table 1: Company Escalation Contacts
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS escalations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -17,7 +15,6 @@ def setup_database():
     )
     """)
 
-    # Table 2: Live Customer Query Logs (for Analytics)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS query_logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,12 +27,19 @@ def setup_database():
 
     companies = [
         ("Amazon", "1800-3000-9009", "cs-reply@amazon.in", "https://www.amazon.in/help"),
+        ("Flipkart", "1800-208-9898", "support@flipkart.com", "https://www.flipkart.com/helpcentre"),
         ("Swiggy", "080-6746-6729", "support@swiggy.in", "https://www.swiggy.com/contact-us"),
-        ("Flipkart", "1800-208-9898", "support@flipkart.com", "https://www.flipkart.com/helpcentre")
+        ("Zomato", "011-3520-0000", "order@zomato.com", "https://www.zomato.com/contact"),
+        ("Uber", "1800-103-6950", "support@uber.com", "https://help.uber.com"),
+        ("Ola", "080-6735-0900", "support@olacabs.com", "https://help.olacabs.com"),
+        ("Paytm", "0120-4456-456", "care@paytm.com", "https://paytm.com/care"),
+        ("PhonePe", "080-6872-7374", "grievances@phonepe.com", "https://www.phonepe.com/contact-us"),
+        ("Netflix", "000-800-919-1694", "support@netflix.com", "https://help.netflix.com"),
+        ("Jio", "198 / 1800-889-9999", "care@jio.com", "https://www.jio.com/help")
     ]
 
     cursor.executemany("""
-    INSERT OR IGNORE INTO escalations (company_name, support_phone, support_email, help_url)
+    INSERT OR REPLACE INTO escalations (company_name, support_phone, support_email, help_url)
     VALUES (?, ?, ?, ?)
     """, companies)
 
@@ -43,7 +47,6 @@ def setup_database():
     connection.close()
 
 
-# 2. Fetch company helpline details
 def get_company_details(name_of_company):
     connection = sqlite3.connect("airs_database.db")
     cursor = connection.cursor()
@@ -67,7 +70,6 @@ def get_company_details(name_of_company):
     return None
 
 
-# 3. Save every customer query into the database
 def log_query(company_name, customer_query, status):
     connection = sqlite3.connect("airs_database.db")
     cursor = connection.cursor()
@@ -82,7 +84,6 @@ def log_query(company_name, customer_query, status):
     connection.close()
 
 
-# 4. Count total, resolved, and escalated queries for the sidebar dashboard
 def get_stats():
     connection = sqlite3.connect("airs_database.db")
     cursor = connection.cursor()
@@ -98,3 +99,22 @@ def get_stats():
 
     connection.close()
     return {"total": total, "resolved": resolved, "escalated": escalated}
+
+
+def get_recent_logs(limit=10):
+    connection = sqlite3.connect("airs_database.db")
+    cursor = connection.cursor()
+    cursor.execute("""
+    SELECT timestamp, company_name, customer_query, status
+    FROM query_logs
+    ORDER BY id DESC
+    LIMIT ?
+    """, (limit,))
+    rows = cursor.fetchall()
+    connection.close()
+    return rows
+
+
+if __name__ == "__main__":
+    setup_database()
+    print("Database updated with all 10 companies successfully!")
