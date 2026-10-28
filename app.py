@@ -177,13 +177,13 @@ with tab_chat:
 with tab_logs:
     st.markdown("### 📋 Real-Time SQLite Query Audit Logs")
     st.caption("Demonstrating persistent SQLite storage: every customer question is recorded automatically.")
+    # NEW:
     logs = get_recent_logs(limit=15)
     if logs:
-        st.dataframe(
-            logs,
-            column_names=["Timestamp", "Company", "Customer Query", "Resolution Status"],
-            use_container_width=True
-        )
+        import pandas as pd
+
+        df = pd.DataFrame(logs, columns=["Timestamp", "Company", "Customer Query", "Resolution Status"])
+        st.dataframe(df, use_container_width=True, hide_index=True)
     else:
         st.info("No queries recorded yet. Ask a question in the chat tab to see it log here live!")
 
@@ -192,15 +192,6 @@ with tab_about:
     st.markdown("""
     ### 👨‍💻 Project Developer Profile
     - **Developer:** **Kaustubh Awasthi**
-    - **Academic Level:** B.Tech 2nd Year Student
     - **Project Title:** A.I.R.S. (AI-Powered Issue Resolution & Escalation System)
     - **Engineering Domain:** Generative AI • Agentic AI • Full-Stack Development
-
-    ---
-    ### 🏗️ Technical Architecture
-    1. **Data Ingestion (BeautifulSoup4):** Automated web scraper parsing real company support articles.
-    2. **Vector Space & Retrieval (Custom Cosine Similarity RAG):** Vector representation indexing 32+ policy chunks into `vector_db.json`.
-    3. **Cognitive LLM Engine (Google Gemini 3.8 Flash):** Multi-lingual reasoning engine outputting structured instructions or strict `UNRESOLVED` fallback flags.
-    4. **Relational Storage (SQLite3):** Manages verified corporate escalation matrices and real-time query audit logs.
-    5. **User Interface (Streamlit):** Reactive web application with multi-lingual routing and one-click email/telephony action handlers.
     """)
